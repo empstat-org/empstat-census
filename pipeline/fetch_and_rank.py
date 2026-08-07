@@ -175,29 +175,28 @@ def _get(url, as_text=True):
     return r.text if as_text else r.content
 
 
-def pick_bulk_base():
-    """Return the first bulk-download base URL that actually serves a file.
-    (ILO moved the bulk files between hosts, so we probe candidates.)"""
-    bases = C.ILOSTAT.get("bulk_bases") or [C.ILOSTAT.get("bulk_base")]
-    probe = "UNE_DEAP_SEX_AGE_RT_A.csv.gz"
-    ua = {"User-Agent": "lmi-ranking/1.0"}
-    for b in bases:
-        try:
-            r = requests.head(f"{b}/{probe}", timeout=30, allow_redirects=True, headers=ua)
-            if r.status_code == 200:
-                return b
-        except Exception:  # noqa: BLE001
-            pass
-    for b in bases:  # some servers block HEAD; try a streamed GET
-        try:
-            r = requests.get(f"{b}/{probe}", timeout=60, stream=True, headers=ua)
-            ok = r.status_code == 200
-            r.close()
-            if ok:
-                return b
-        except Exception:  # noqa: BLE001
-            pass
-    return bases[0]
+def load_indicator_toc():
+    """Return the set of valid dataset ids from the rplumber indicator toc."""
+    try:
+        rows = list(_get_csv_rows(C.ILOSTAT["toc_indicator"]))
+        ids = set()
+        for r in rows:
+            i = (r.get("id") or r.get("ID") or r.get("indicator") or "").strip()
+            if i:
+                ids.add(i)
+        if ids:
+            print(f"  indicator table of contents loaded ({len(ids)} datasets)")
+            return ids
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! could not load indicator toc ({e}); will attempt downloads directly")
+    return None
+
+
+def dataset_url(dataset_id):
+    """rplumber data endpoint returning CSV with codes + labels (type=both)."""
+    frm = CURRENT_YEAR - C.ILOSTAT.get("years_back", 25)
+    return (f"{C.ILOSTAT['data_api']}?id={dataset_id}"
+            f"&type=both&timefrom={frm}&format=.csv")
 
 
 def _get_csv_rows(url):
@@ -214,39 +213,13 @@ def _get_csv_rows(url):
 # --------------------------------------------------------------------------- #
 # Reference data: source labels, country names/regions
 # --------------------------------------------------------------------------- #
-def load_source_labels():
-    """
-    Return {source_code: label} from ILOSTAT's CL_SURVEY code list, plus a set of
-    source codes that qualify as household surveys per config keywords.
-    """
-    labels = {}
-    # try the rplumber code list first, then the bulk-facility dictionary CSVs
-    urls = [C.ILOSTAT["codelist_survey"]] + \
-           [f"{b}/CL_SURVEY_en.csv" for b in C.ILOSTAT.get("dic_bases", [])]
-    for u in urls:
-        try:
-            rows = list(_get_csv_rows(u))
-            for row in rows:
-                code = (row.get("code") or row.get("SURVEY") or row.get("id") or "").strip()
-                label = (row.get("label") or row.get("Label") or row.get("description") or "").strip()
-                if code:
-                    labels[code] = label
-            if labels:
-                break
-        except Exception as e:  # noqa: BLE001
-            print(f"  ! source code list not available at {u} ({e})", file=sys.stderr)
-    if not labels:
-        print("  ! no source code list loaded; keyword-matching raw source strings instead",
-              file=sys.stderr)
-
-    def is_hh(label):
-        l = (label or "").lower()
-        if any(x in l for x in C.SOURCE_EXCLUDE_KEYWORDS):
-            return False
-        return any(x in l for x in C.HOUSEHOLD_SURVEY_KEYWORDS)
-
-    hh_codes = {code for code, label in labels.items() if is_hh(label)}
-    return labels, hh_codes, is_hh
+def is_household_source(label):
+    """True if a source LABEL (e.g. 'Labour force survey') is an included source
+    for this index, per the config keywords."""
+    l = (label or "").lower()
+    if any(x in l for x in C.SOURCE_EXCLUDE_KEYWORDS):
+        return False
+    return any(x in l for x in C.HOUSEHOLD_SURVEY_KEYWORDS)
 
 
 def load_countries():
@@ -289,15 +262,13 @@ def gather(limit=None):
           'recent_years': set(int), # years with a qualifying obs (last decade+)
       }
     """
-    labels, hh_codes, is_hh = load_source_labels()
-    print(f"  household-survey source codes recognised: {len(hh_codes)}")
-
-    bulk_base = pick_bulk_base()
-    print(f"  using bulk base: {bulk_base}")
+    toc_ids = load_indicator_toc()
+    print(f"  using data API: {C.ILOSTAT['data_api']}")
 
     indicators = C.KEY_INDICATORS[:limit] if limit else C.KEY_INDICATORS
     avail = defaultdict(dict)
     sources = defaultdict(dict)  # iso -> {survey label: latest year seen}
+    diagnosed = False
 
     for ind in indicators:
         key = ind["code"]                                   # stable key for this indicator
@@ -306,33 +277,46 @@ def gather(limit=None):
         for ci, base in enumerate(fetch_codes):
           for period in ind["periodicities"]:
             dataset_id = f"{base}_{period}"
-            url = f"{bulk_base}/{dataset_id}.csv.gz"
+            if toc_ids is not None and dataset_id not in toc_ids:
+                continue  # not a real ILOSTAT dataset (e.g. this indicator has no such periodicity)
+            url = dataset_url(dataset_id)
             print(f"  fetching {dataset_id} ...", flush=True)
             try:
-                rows = _get_csv_rows(url)
+                rows = list(_get_csv_rows(url))
+                # One-time diagnostic: show real columns + example source labels.
+                if not diagnosed and rows:
+                    cols = list(rows[0].keys())
+                    seen = []
+                    for rr in rows:
+                        sv = (rr.get("source.label") or rr.get("source_label")
+                              or rr.get("source") or "").strip()
+                        if sv and sv not in seen:
+                            seen.append(sv)
+                        if len(seen) >= 12:
+                            break
+                    print(f"    [diag] columns: {cols}")
+                    print(f"    [diag] sample source labels: {seen}")
+                    diagnosed = True
                 n = 0
                 for row in rows:
-                    iso = (row.get("ref_area") or "").strip()
-                    if not iso or len(iso) != 3:
+                    iso = ("" if row.get("ref_area") is None else str(row.get("ref_area"))).strip()
+                    if len(iso) != 3 or not iso.isalpha() or not iso.isupper():
                         continue
                     # fallback preference: if a higher-priority code already
                     # populated this indicator for the country, ignore later codes
                     if ci > 0 and key in avail[iso]:
                         continue
-                    src = (row.get("source") or "").strip()
-                    # qualify the source: by code (preferred) or by raw label
-                    src_code = src.split(":")[0].strip() if src else ""
-                    src_label = labels.get(src_code, src)
-                    if hh_codes:
-                        ok = src_code in hh_codes or is_hh(src_label)
-                    else:
-                        ok = is_hh(src_label)
-                    if not ok:
+                    src_label = (row.get("source.label") or row.get("source_label") or "").strip()
+                    if not src_label:
+                        src_label = ("" if row.get("source") is None else str(row.get("source"))).strip()
+                    if src_label.lower() == "nan":
+                        src_label = ""
+                    if not is_household_source(src_label):
                         continue
                     yr = year_of(row.get("time"))
                     if yr is None:
                         continue
-                    lbl = (src_label or src_code or "").strip()
+                    lbl = src_label
                     if lbl and (lbl not in sources[iso] or yr > sources[iso][lbl]):
                         sources[iso][lbl] = yr
                     rec = avail[iso].get(key)
