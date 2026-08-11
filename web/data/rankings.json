@@ -1,7 +1,7 @@
 {
-  "generated": "2026-08-11 13:14",
+  "generated": "2026-08-11 13:46",
   "current_year": 2026,
-  "index_name": "Census Coverage Index",
+  "index_name": "Population Census",
   "source": "ILOSTAT (ilostat.ilo.org)",
   "default_weights": {
     "coverage": 1.0,
