@@ -190,7 +190,6 @@
       <div class="controls">
         <input type="search" id="search" placeholder="Search country…">
         <select id="region"></select>
-        <label class="chk"><input type="checkbox" id="hasCensus"> Has census data only</label>
         <button class="btn" id="clearFilters" style="width:auto;padding:9px 12px">Clear</button>
         <span class="count" id="count"></span>
       </div>
@@ -272,7 +271,7 @@ const fmt = n => (n===null||n===undefined) ? "—" : (Math.round(n*10)/10);
 
 const state = {
   w:{coverage:1, recency:1},
-  sortKey:"overall", sortDir:-1, region:"All", q:"", hasCensus:false
+  sortKey:"overall", sortDir:-1, region:"All", q:""
 };
 const periodName = {M:"Monthly", Q:"Quarterly", A:"Annual", irregular:"Irregular", null:"—"};
 const MONTHS=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -302,7 +301,6 @@ function computeRanked(){
   let f = rows.filter(c=>{
     if(!(c.coverage>0)) return false;   // hide countries with no census data (zero coverage)
     if(state.region!=="All" && c.region!==state.region) return false;
-    if(state.hasCensus && !(c.latest_year!=null)) return false;
     if(state.q && !c.country.toLowerCase().includes(state.q) && !c.iso3.toLowerCase().includes(state.q)) return false;
     return true;
   });
@@ -401,9 +399,9 @@ function openBreakdown(focus){
   }
   else if(focus==="sources"){
     const map={}; cs.forEach(c=>(c.sources||[]).forEach(s=>map[s.name]=(map[s.name]||0)+1));
-    const a=Object.entries(map).map(([name,n])=>({name,n})).sort((x,y)=>y.n-x.n);
+    const a=Object.entries(map).map(([name,n])=>({name,n})).filter(x=>x.n>1).sort((x,y)=>y.n-x.n);
     title="Data sources";
-    body=`<h4 class="brk-h">Most common data sources</h4>`+(a.length?rows(a,"var(--rec)"):none("No named sources in this dataset."));
+    body=`<h4 class="brk-h">Most common data sources</h4>`+(a.length?rows(a,"var(--rec)"):none("No sources used by more than one country."));
   }
   else if(focus==="recency"){
     const b={a:0,b:0,c:0,d:0,none:0};
@@ -483,10 +481,9 @@ function init(){
   $("#export").onclick=exportCSV;
   $("#search").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase();render();});
   $("#region").addEventListener("change",e=>{state.region=e.target.value;render();});
-  $("#hasCensus").addEventListener("change",e=>{state.hasCensus=e.target.checked;render();});
   $("#clearFilters").onclick=()=>{
-    state.region="All"; state.q=""; state.hasCensus=false;
-    $("#region").value="All"; $("#search").value=""; $("#hasCensus").checked=false;
+    state.region="All"; state.q="";
+    $("#region").value="All"; $("#search").value="";
     render();
   };
   document.querySelectorAll("th").forEach(th=>th.addEventListener("click",()=>{
