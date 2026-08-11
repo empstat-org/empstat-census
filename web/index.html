@@ -6,10 +6,10 @@
 <title>Census Coverage Index — population census labour data in ILOSTAT</title>
 <style>
   :root{
-    --brand:#1a5bad; --brand-dark:#123f83; --brand-light:#e7effb;
+    --brand:#c2610e; --brand-dark:#8f4708; --brand-light:#fdeede;
     --ink:#1b2536; --muted:#5c6d85; --line:#e3e9f1; --bg:#f6f8fc; --card:#fff;
     --good:#1c9463; --mid:#e3ad0a; --low:#d55c52;
-    --cov:#1a5bad; --frq:#33a294; --rec:#7e5fd4;
+    --cov:#c2610e; --frq:#33a294; --rec:#7e5fd4;
     --shadow:0 1px 3px rgba(16,32,64,.08),0 6px 24px rgba(16,32,64,.06);
   }
   *{box-sizing:border-box}
@@ -291,6 +291,10 @@ function overall(c){
   return (c.coverage*w.coverage + c.recency*w.recency)/tot;
 }
 function scoreColor(v){ return v>=70?"var(--good)":v>=45?"var(--mid)":"var(--low)"; }
+function perTags(list, fallback){
+  let ps = (list && list.length) ? list : (fallback && fallback!=="irregular" ? [fallback] : []);
+  return ps.map(p=>`<span class="tag">${p}</span>`).join(" ");
+}
 
 function computeRanked(){
   const rows = D.countries.map(c=>({...c, overall:overall(c)}));
