@@ -1,4 +1,4 @@
-# Population Census
+# Population Census Coverage Index
 
 One of the three Empstat labour-data coverage indices. This repo is self-contained
 and deploys to **https://census.empstat.org** via GitHub Pages.
