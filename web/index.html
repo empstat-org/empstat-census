@@ -300,6 +300,7 @@ function computeRanked(){
   const rows = D.countries.map(c=>({...c, overall:overall(c)}));
   // filter
   let f = rows.filter(c=>{
+    if(!(c.coverage>0)) return false;   // hide countries with no census data (zero coverage)
     if(state.region!=="All" && c.region!==state.region) return false;
     if(state.hasCensus && !(c.latest_year!=null)) return false;
     if(state.q && !c.country.toLowerCase().includes(state.q) && !c.iso3.toLowerCase().includes(state.q)) return false;
