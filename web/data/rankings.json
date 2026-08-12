@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-11 13:55",
+  "generated": "2026-08-12 19:59",
   "current_year": 2026,
   "index_name": "Population Census Coverage Index",
   "source": "ILOSTAT (ilostat.ilo.org)",
@@ -10340,7 +10340,7 @@
     {
       "iso3": "NRU",
       "country": "Naoero",
-      "region": "Other",
+      "region": "Asia and the Pacific",
       "coverage": 83.1,
       "frequency": null,
       "recency": 88.2,
