@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08 00:01",
+  "generated": "2026-09-08 10:43",
   "current_year": 2026,
   "index_name": "Population Census Coverage Index",
   "source": "ILOSTAT (ilostat.ilo.org)",
@@ -9463,16 +9463,16 @@
       "iso3": "NAM",
       "country": "Namibia",
       "region": "Africa",
-      "coverage": 3.4,
+      "coverage": 76.3,
       "frequency": null,
       "recency": 100.0,
       "latest_year": 2023,
-      "latest_period": "2001",
+      "latest_period": "2023",
       "best_periodicity": "A",
       "periodicities": [
         "A"
       ],
-      "n_covered": 1,
+      "n_covered": 14,
       "n_total": 19,
       "pending": null,
       "sources": [
@@ -9483,8 +9483,8 @@
       ],
       "indicators": {
         "POP_XWAP_SEX_AGE_NB": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9492,8 +9492,8 @@
           "via": null
         },
         "EAP_TEAP_SEX_AGE_NB": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9501,8 +9501,8 @@
           "via": null
         },
         "EAP_DWAP_SEX_AGE_RT": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9510,15 +9510,17 @@
           "via": null
         },
         "EMP_TEMP_SEX_AGE_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_DWAP_SEX_AGE_RT": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9526,8 +9528,8 @@
           "via": null
         },
         "UNE_TUNE_SEX_AGE_NB": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9535,8 +9537,8 @@
           "via": null
         },
         "UNE_DEAP_SEX_AGE_RT": {
-          "covered": false,
-          "latest": 2001,
+          "covered": true,
+          "latest": 2023,
           "periodicity": "A",
           "periodicities": [
             "A"
@@ -9551,24 +9553,30 @@
           "via": null
         },
         "EMP_TEMP_SEX_STE_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_TEMP_SEX_OCU_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_TEMP_SEX_ECO_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_NIFL_SEX_RT": {
@@ -9606,27 +9614,33 @@
           "periodicities": [
             "A"
           ],
-          "via": "place of birth"
+          "via": "citizenship"
         },
         "EMP_TEMP_SEX_GEO_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_TEMP_SEX_AGE_DSB_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_TEMP_SEX_EDU_NB": {
-          "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "covered": true,
+          "latest": 2023,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         }
       }
