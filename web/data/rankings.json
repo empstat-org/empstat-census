@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-15 00:18",
+  "generated": "2026-09-22 00:37",
   "current_year": 2026,
   "index_name": "Population Census Coverage Index",
   "source": "ILOSTAT (ilostat.ilo.org)",
@@ -19833,9 +19833,11 @@
         },
         "EMP_TEMP_SEX_AGE_DSB_NB": {
           "covered": false,
-          "latest": null,
-          "periodicity": null,
-          "periodicities": [],
+          "latest": 2010,
+          "periodicity": "A",
+          "periodicities": [
+            "A"
+          ],
           "via": null
         },
         "EMP_TEMP_SEX_EDU_NB": {
